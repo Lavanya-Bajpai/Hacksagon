@@ -1,0 +1,229 @@
+import React, { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
+import { Link, useNavigate } from 'react-router-dom';
+import { AuthProvider, useAuth } from '../../../contexts/AuthContext';
+import { useLanguage } from '../../../contexts/LanguageContext';
+
+const QuillIcon = () => (
+  <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" className="mx-auto mb-4">
+    <path d="M40 8L8 40" stroke="#C19A6B" strokeWidth="3" strokeLinecap="round"/>
+    <path d="M32 8L40 8L40 16" stroke="#C19A6B" strokeWidth="3" strokeLinecap="round"/>
+    <ellipse cx="14" cy="34" rx="2" ry="5" fill="#C19A6B" fillOpacity="0.5"/>
+  </svg>
+);
+
+const Login: React.FC = () => {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
+  const { login, currentUser } = useAuth();
+  const { t } = useLanguage();
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!email || !password) {
+      setError('Please enter both email and password');
+      return;
+    }
+
+    try {
+      setError('');
+      setLoading(true);
+      console.log("Submitting login form...");
+      const user = await login(email, password);
+      console.log("Login successful, user:", user.email);
+      console.log("Redirecting to main page...");
+      
+      // Small delay to ensure Firebase auth state is updated
+      setTimeout(() => {
+        navigate('/main');
+      }, 500);
+    } catch (err: any) {
+      console.error('Login error:', err);
+      setError(err.message || 'Failed to sign in. Please check your credentials.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleForgotPassword = () => {
+    alert('Password recovery feature would be implemented in a real application');
+  };
+
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#f5e1a0] via-[#e2d8c0] to-[#bfa77a] py-6 md:py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+      {/* Constitution book watermark prints */}
+      <div className="absolute inset-0 z-0 pointer-events-none select-none">
+        {[
+          { x: '12%', y: '18%', rotate: '-18deg', size: 44 },
+          { x: '68%', y: '12%', rotate: '12deg', size: 38 },
+          { x: '28%', y: '62%', rotate: '-10deg', size: 36 },
+          { x: '58%', y: '72%', rotate: '8deg', size: 40 },
+          { x: '82%', y: '48%', rotate: '-14deg', size: 42 },
+          { x: '40%', y: '78%', rotate: '6deg', size: 34 },
+        ].map((item, i) => (
+          <span
+            key={i}
+            style={{
+              position: 'absolute',
+              left: item.x,
+              top: item.y,
+              transform: `rotate(${item.rotate})`,
+              opacity: 0.22,
+              userSelect: 'none',
+              pointerEvents: 'none',
+              display: 'block',
+            }}
+          >
+            <svg width={item.size} height={item.size} viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect x="4" y="7" width="24" height="18" rx="4" fill="#fffbe6" stroke="#bfa77a" strokeWidth="1.5"/>
+              <rect x="7" y="10" width="8" height="12" rx="2" fill="#e2c275" stroke="#e2d8c0" strokeWidth="1"/>
+              <rect x="17" y="10" width="8" height="12" rx="2" fill="#e2c275" stroke="#e2d8c0" strokeWidth="1"/>
+              <line x1="11" y1="12" x2="11" y2="20" stroke="#bfa77a" strokeWidth="0.7"/>
+              <line x1="21" y1="12" x2="21" y2="20" stroke="#bfa77a" strokeWidth="0.7"/>
+            </svg>
+          </span>
+        ))}
+      </div>
+      <motion.div
+        initial={{ opacity: 0, y: 50 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.25 }}
+        className="max-w-md w-full space-y-6 md:space-y-8 bg-white/40 backdrop-blur-lg p-6 md:p-10 rounded-2xl md:rounded-3xl shadow-2xl border border-yellow-200 relative overflow-hidden"
+        style={{ boxShadow: '0 8px 32px 0 rgba(31, 38, 135, 0.15)' }}
+      >
+        <motion.div
+          initial={{ scale: 0.8, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ duration: 0.3, delay: 0.1 }}
+          className="text-center"
+        >
+          <QuillIcon />
+          <h2 className="text-2xl md:text-3xl font-bold text-amber-800 font-serif">{t('login')}</h2>
+        </motion.div>
+        <div>
+          <h2 className="mt-2 text-center text-xl md:text-2xl font-extrabold text-primary font-serif drop-shadow-md">
+            {t('signin')}
+          </h2>
+          <p className="mt-2 text-center text-xs md:text-sm text-gray-700">
+            {t('or')}
+            {' '}
+            <Link to="/signup" className="font-medium text-accent hover:text-accent/80 underline">
+              {t('createaccount')}
+            </Link>
+          </p>
+        </div>
+        <form className="mt-6 md:mt-8 space-y-4 md:space-y-6" onSubmit={handleSubmit}>
+          {error && (
+            <motion.div
+              initial={{ x: -20, opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              className="bg-red-100 border border-red-400 text-red-700 px-3 md:px-4 py-2 md:py-3 rounded shadow-sm text-sm"
+            >
+              {error}
+            </motion.div>
+          )}
+          <div className="space-y-3 md:space-y-4 rounded-md">
+            <div>
+              <label htmlFor="email-address" className="sr-only">
+                {t('email')}
+              </label>
+              <input
+                id="email-address"
+                name="email"
+                type="email"
+                autoComplete="email"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="transition-all duration-300 appearance-none rounded-md relative block w-full px-3 py-2 md:py-3 border border-yellow-300 placeholder-yellow-700 text-gray-900 focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent focus:z-10 text-sm md:text-base bg-white/70 backdrop-blur-md shadow-inner hover:shadow-lg"
+                placeholder={t('emailplaceholder')}
+                disabled={loading}
+              />
+            </div>
+            <div>
+              <label htmlFor="password" className="sr-only">
+                {t('password')}
+              </label>
+              <input
+                id="password"
+                name="password"
+                type="password"
+                autoComplete="current-password"
+                required
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="transition-all duration-300 appearance-none rounded-md relative block w-full px-3 py-2 md:py-3 border border-yellow-300 placeholder-yellow-700 text-gray-900 focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent focus:z-10 text-sm md:text-base bg-white/70 backdrop-blur-md shadow-inner hover:shadow-lg"
+                placeholder={t('passwordplaceholder')}
+                disabled={loading}
+              />
+            </div>
+          </div>
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+            <div className="flex items-center">
+              <input
+                id="remember-me"
+                name="remember-me"
+                type="checkbox"
+                className="h-4 w-4 text-accent focus:ring-accent border-yellow-300 rounded"
+                disabled={loading}
+              />
+              <label htmlFor="remember-me" className="ml-2 block text-xs md:text-sm text-yellow-900">
+                {t('rememberme')}
+              </label>
+            </div>
+            <div className="text-xs md:text-sm">
+              <button
+                type="button"
+                onClick={handleForgotPassword}
+                className="font-medium text-accent hover:text-accent/80 bg-transparent border-none cursor-pointer underline"
+                disabled={loading}
+              >
+                {t('forgotpassword')}
+              </button>
+            </div>
+          </div>
+          <div>
+            <motion.button
+              whileHover={{ scale: 1.04, boxShadow: '0 0 8px #C19A6B' }}
+              whileTap={{ scale: 0.98 }}
+              type="submit"
+              className="group relative w-full flex justify-center py-2 md:py-3 px-4 border border-transparent text-sm md:text-base font-bold rounded-md text-white bg-gradient-to-r from-yellow-700 via-yellow-600 to-yellow-500 hover:from-yellow-600 hover:to-yellow-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-accent shadow-lg transition-all duration-300"
+              disabled={loading}
+            >
+              {loading ? (
+                <div className="flex items-center">
+                  <svg className="animate-spin -ml-1 mr-3 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  {t('signingin')}
+                </div>
+              ) : (
+                t('signin')
+              )}
+            </motion.button>
+          </div>
+        </form>
+        <div className="mt-4 text-center">
+          <Link to="/" className="font-medium text-accent hover:text-accent/80 text-sm underline">
+            {t('backtohome')}
+          </Link>
+        </div>
+        {/* Animated border accent */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 0.5 }}
+          transition={{ duration: 1, repeat: Infinity, repeatType: 'reverse' }}
+          className="absolute -inset-1 rounded-3xl border-4 border-yellow-300 pointer-events-none z-0"
+          style={{ filter: 'blur(2px)' }}
+        />
+      </motion.div>
+    </div>
+  );
+};
+
+export default Login; 
